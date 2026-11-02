@@ -59,6 +59,7 @@
             --st-hungup: #a33b3b; --st-notint: #d1495b; --st-busy: #b8407a;
             --st-low: #7a8586; --st-int: #2563c9; --st-callback: #0e9f7e;
             --st-customer: #1f8a4c; --st-proposal: #c9951c; --st-inactive: #a8aeae;
+            --st-notreachable: #b07715;   /* NEW */
 
             --bs-body-font-family: var(--font-sans);
             --bs-body-bg: var(--c-bg);
@@ -352,6 +353,7 @@
         .status-badge-interested { --st: var(--st-int); }
         .status-badge-callback { --st: var(--st-callback); }
         .status-badge-wrong-number { --st: var(--st-low); }
+        .status-badge-not-reachable { --st: var(--st-notreachable); }
         .status-badge-customer { --st: var(--st-customer); }
         .status-badge-contacted { --st: var(--st-int); }
         .status-badge-proposal { --st: var(--st-proposal); }
@@ -496,7 +498,7 @@
             z-index: 1050; background: var(--c-surface); color: var(--c-text);
             border: 1px solid var(--c-border); border-radius: var(--r-xl);
             padding: 1.15rem 1.35rem 1.25rem; box-shadow: var(--sh-3), 0 0 0 4px rgba(14,124,107,.08);
-            width: min(920px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow-y: auto;
+            width: min(1040px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow-y: auto;
             display: none;
         }
         .auto-dialer-panel.show { display: block; animation: panelIn .25s var(--ease); }
@@ -527,9 +529,9 @@
         .dialer-calling-box #currentCallNumber { font-family: var(--font-mono); color: #9fe8d7; }
         .dialer-calling-box .spinner-border { width: 18px; height: 18px; color: #6fe0c8; }
 
-        /* DIALER STATUS BUTTONS — 9 statuses, one row, fixed order */
+        /* DIALER STATUS BUTTONS — 11 statuses, one row, fixed order */
         .dialer-status-row {
-            display: grid; grid-template-columns: repeat(9, minmax(0, 1fr));
+            display: grid; grid-template-columns: repeat(11, minmax(0, 1fr));
             gap: .35rem; padding: 2px 0 4px;
         }
         .dialer-status-btn {
@@ -557,6 +559,8 @@
         .dialer-status-btn.lowpotential { --st: var(--st-low); }
         .dialer-status-btn.interested { --st: var(--st-int); }
         .dialer-status-btn.callback { --st: var(--st-callback); }
+        .dialer-status-btn.wrong-number { --st: var(--st-low); }
+        .dialer-status-btn.not-reachable { --st: var(--st-notreachable); }
         /* narrow screens: keep order, scroll horizontally instead of shrinking */
         @media (max-width: 767.98px) {
             .dialer-status-row {
@@ -602,6 +606,7 @@
             <a href="#" class="nav-link-custom" onclick="filterByStatus('No Answer',event)"><i class="bi bi-telephone-x-fill text-warning"></i> <span data-i18n="st.No Answer">No Answer</span></a>
             <a href="#" class="nav-link-custom" onclick="filterByStatus('Not Interested',event)"><i class="bi bi-hand-thumbs-down-fill text-danger"></i> <span data-i18n="st.Not Interested">Not Interested</span></a>
             <a href="#" class="nav-link-custom" onclick="filterByStatus('Wrong Number',event)"><i class="bi bi-exclamation-triangle-fill text-secondary"></i> <span data-i18n="st.Wrong Number">Wrong Number</span></a>
+            <a href="#" class="nav-link-custom" onclick="filterByStatus('Not Reachable',event)"><i class="bi bi-wifi-off text-warning"></i> <span data-i18n="st.Not Reachable">Not Reachable</span></a>
             <a href="#" class="nav-link-custom" onclick="filterByStatus('Customer',event)"><i class="bi bi-check-circle-fill text-success"></i> <span data-i18n="nav.customers">Customers</span></a>
             <a href="#" class="nav-link-custom" onclick="filterByArchive(true,event)"><i class="bi bi-archive-fill text-warning"></i> <span data-i18n="nav.archived">Archived</span></a>
             <hr class="my-2 mx-3">
@@ -644,7 +649,7 @@
 
             <section id="view-customers" class="tab-view d-none">
                 <div class="d-flex justify-content-between align-items-md-center gap-3 mb-4"><div><h4 class="fw-bold mb-1" data-i18n="cust.title">Customer Directory</h4></div><div class="d-flex gap-2"><button class="btn btn-outline-secondary btn-sm" onclick="exportData('xlsx')"><i class="bi bi-file-earmark-excel me-1"></i> <span data-i18n="cust.export">Export</span></button><button class="btn btn-primary btn-sm" onclick="openCustomerModal()"><i class="bi bi-plus-lg me-1"></i> <span data-i18n="btn.add">Add</span></button></div></div>
-                <div class="card border mb-3 p-3 bg-tertiary-bg"><div class="row g-2 align-items-end"><div class="col-12 col-md-3"><label class="form-label small fw-bold mb-1" data-i18n="f.search">Search</label><input type="text" id="filterSearch" class="form-control form-control-sm" oninput="applyFilters()"></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.status">Status</label><select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="New" data-i18n="st.New">New</option><option value="Voice Mail" data-i18n="st.Voice Mail">Voice Mail</option><option value="No Answer" data-i18n="st.No Answer">No Answer</option><option value="Hung Up" data-i18n="st.Hung Up">Hung Up</option><option value="Not Interested" data-i18n="st.Not Interested">Not Interested</option><option value="Busy" data-i18n="st.Busy">Busy</option><option value="Low Potential" data-i18n="st.Low Potential">Low Potential</option><option value="Interested" data-i18n="st.Interested">Interested</option><option value="Call Back" data-i18n="st.Call Back">Call Back</option><option value="Wrong Number" data-i18n="st.Wrong Number">Wrong Number</option><option value="Contacted" data-i18n="st.Contacted">Contacted</option><option value="Proposal Sent" data-i18n="st.Proposal Sent">Proposal Sent</option><option value="Customer" data-i18n="st.Customer">Customer</option><option value="Inactive" data-i18n="st.Inactive">Inactive</option></select></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.priority">Priority</label><select id="filterPriority" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="High" data-i18n="p.High">High</option><option value="Medium" data-i18n="p.Medium">Medium</option><option value="Low" data-i18n="p.Low">Low</option></select></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.source">Source</label><select id="filterSource" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="Website" data-i18n="src.Website">Website</option><option value="Referral" data-i18n="src.Referral">Referral</option><option value="Cold Call" data-i18n="src.Cold Call">Cold Call</option><option value="LinkedIn" data-i18n="src.LinkedIn">LinkedIn</option><option value="Trade Show" data-i18n="src.Trade Show">Trade Show</option></select></div><div class="col-6 col-md-3 d-flex gap-1 align-items-end"><div class="w-100"><label class="form-label small fw-bold mb-1" data-i18n="f.show">Show</label><select id="itemsPerPageSelect" class="form-select form-select-sm" onchange="changeItemsPerPage()"><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></div><button class="btn btn-sm btn-outline-secondary w-100" onclick="resetFilters()" data-i18n="f.clear">Clear</button></div></div></div>
+                <div class="card border mb-3 p-3 bg-tertiary-bg"><div class="row g-2 align-items-end"><div class="col-12 col-md-3"><label class="form-label small fw-bold mb-1" data-i18n="f.search">Search</label><input type="text" id="filterSearch" class="form-control form-control-sm" oninput="applyFilters()"></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.status">Status</label><select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="New" data-i18n="st.New">New</option><option value="Voice Mail" data-i18n="st.Voice Mail">Voice Mail</option><option value="No Answer" data-i18n="st.No Answer">No Answer</option><option value="Hung Up" data-i18n="st.Hung Up">Hung Up</option><option value="Not Interested" data-i18n="st.Not Interested">Not Interested</option><option value="Busy" data-i18n="st.Busy">Busy</option><option value="Low Potential" data-i18n="st.Low Potential">Low Potential</option><option value="Interested" data-i18n="st.Interested">Interested</option><option value="Call Back" data-i18n="st.Call Back">Call Back</option><option value="Wrong Number" data-i18n="st.Wrong Number">Wrong Number</option><option value="Not Reachable" data-i18n="st.Not Reachable">Not Reachable</option><option value="Contacted" data-i18n="st.Contacted">Contacted</option><option value="Proposal Sent" data-i18n="st.Proposal Sent">Proposal Sent</option><option value="Customer" data-i18n="st.Customer">Customer</option><option value="Inactive" data-i18n="st.Inactive">Inactive</option></select></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.priority">Priority</label><select id="filterPriority" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="High" data-i18n="p.High">High</option><option value="Medium" data-i18n="p.Medium">Medium</option><option value="Low" data-i18n="p.Low">Low</option></select></div><div class="col-6 col-md-2"><label class="form-label small fw-bold mb-1" data-i18n="lbl.source">Source</label><select id="filterSource" class="form-select form-select-sm" onchange="applyFilters()"><option value="" data-i18n="f.all">All</option><option value="Website" data-i18n="src.Website">Website</option><option value="Referral" data-i18n="src.Referral">Referral</option><option value="Cold Call" data-i18n="src.Cold Call">Cold Call</option><option value="LinkedIn" data-i18n="src.LinkedIn">LinkedIn</option><option value="Trade Show" data-i18n="src.Trade Show">Trade Show</option></select></div><div class="col-6 col-md-3 d-flex gap-1 align-items-end"><div class="w-100"><label class="form-label small fw-bold mb-1" data-i18n="f.show">Show</label><select id="itemsPerPageSelect" class="form-select form-select-sm" onchange="changeItemsPerPage()"><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></div><button class="btn btn-sm btn-outline-secondary w-100" onclick="resetFilters()" data-i18n="f.clear">Clear</button></div></div></div>
                 <div class="bulk-action-bar mb-3 d-none" id="bulkActionBar">
                     <span class="small fw-bold me-2" id="selectedCount">0</span>
                     <button class="btn btn-sm btn-outline-secondary" onclick="bulkChangeStatus('New')" data-i18n="st.New">New</button>
@@ -656,6 +661,8 @@
                     <button class="btn btn-sm btn-outline-secondary" onclick="bulkChangeStatus('Low Potential')" data-i18n="st.Low Potential">Low Potential</button>
                     <button class="btn btn-sm btn-outline-primary" onclick="bulkChangeStatus('Interested')" data-i18n="st.Interested">Interested</button>
                     <button class="btn btn-sm btn-outline-success" onclick="bulkChangeStatus('Call Back')" data-i18n="st.Call Back">Call Back</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="bulkChangeStatus('Wrong Number')" data-i18n="st.Wrong Number">Wrong Number</button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="bulkChangeStatus('Not Reachable')" data-i18n="st.Not Reachable">Not Reachable</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="bulkDelete()" data-i18n="act.delete">Delete</button>
                     <button class="btn btn-sm btn-outline-primary" onclick="startAutoDialerFromSelection()" data-i18n="bulk.autodial">Auto Dial</button>
                     <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()" data-i18n="f.clear">Clear</button>
@@ -707,7 +714,7 @@
     <button class="btn btn-success btn-sm w-100 mt-2 d-none" id="nextCallBtn" onclick="nextAutoDialerCall()"><i class="bi bi-skip-forward-fill me-1"></i> <span data-i18n="dlr.next">Next Call (Skip)</span></button>
 </div>
 
-<div class="modal fade" id="customerModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="modalTitle">Customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="customerForm" class="row g-3" onsubmit="saveCustomer(event)"><input type="hidden" id="cust-id"><div class="col-12 col-md-6"><label class="form-label small fw-bold"><span data-i18n="lbl.name">Name</span> *</label><input type="text" id="cust-name" class="form-control" required></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.company">Company</label><input type="text" id="cust-company" class="form-control"></div><div class="col-12 col-md-6"><label class="form-label small fw-bold"><span data-i18n="lbl.email">Email</span> *</label><input type="email" id="cust-email" class="form-control" required></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.phone">Phone</label><div class="input-group"><input type="text" id="cust-phone" class="form-control" oninput="handlePhoneInput(this.value)"><span class="input-group-text small" id="detectedCountryBadge">Auto</span></div></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.city">City</label><input type="text" id="cust-city" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.country">Country</label><input type="text" id="cust-country" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.address">Address</label><input type="text" id="cust-address" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.source">Source</label><select id="cust-source" class="form-select"><option value="Website" data-i18n="src.Website">Website</option><option value="Referral" data-i18n="src.Referral">Referral</option><option value="Cold Call" data-i18n="src.Cold Call">Cold Call</option><option value="LinkedIn" data-i18n="src.LinkedIn">LinkedIn</option><option value="Trade Show" data-i18n="src.Trade Show">Trade Show</option></select></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.status">Status</label><select id="cust-status" class="form-select"><option value="New" selected data-i18n="st.New">New</option><option value="Voice Mail" data-i18n="st.Voice Mail">Voice Mail</option><option value="No Answer" data-i18n="st.No Answer">No Answer</option><option value="Hung Up" data-i18n="st.Hung Up">Hung Up</option><option value="Not Interested" data-i18n="st.Not Interested">Not Interested</option><option value="Busy" data-i18n="st.Busy">Busy</option><option value="Low Potential" data-i18n="st.Low Potential">Low Potential</option><option value="Interested" data-i18n="st.Interested">Interested</option><option value="Call Back" data-i18n="st.Call Back">Call Back</option><option value="Wrong Number" data-i18n="st.Wrong Number">Wrong Number</option><option value="Contacted" data-i18n="st.Contacted">Contacted</option><option value="Proposal Sent" data-i18n="st.Proposal Sent">Proposal Sent</option><option value="Customer" data-i18n="st.Customer">Customer</option><option value="Inactive" data-i18n="st.Inactive">Inactive</option></select></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.priority">Priority</label><select id="cust-priority" class="form-select"><option value="Low" data-i18n="p.Low">Low</option><option value="Medium" selected data-i18n="p.Medium">Medium</option><option value="High" data-i18n="p.High">High</option></select></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.rep">Rep</label><input type="text" id="cust-rep" class="form-control" value="John Sales"></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.followup">Follow-Up</label><input type="date" id="cust-followup" class="form-control"></div><div class="col-12"><label class="form-label small fw-bold" data-i18n="lbl.notes">Notes</label><textarea id="cust-notes" class="form-control" rows="3"></textarea></div><div class="modal-footer px-0 pb-0 pt-3"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="btn.cancel">Cancel</button><button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button></div></form></div></div></div></div>
+<div class="modal fade" id="customerModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="modalTitle">Customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="customerForm" class="row g-3" onsubmit="saveCustomer(event)"><input type="hidden" id="cust-id"><div class="col-12 col-md-6"><label class="form-label small fw-bold"><span data-i18n="lbl.name">Name</span> *</label><input type="text" id="cust-name" class="form-control" required></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.company">Company</label><input type="text" id="cust-company" class="form-control"></div><div class="col-12 col-md-6"><label class="form-label small fw-bold"><span data-i18n="lbl.email">Email</span> *</label><input type="email" id="cust-email" class="form-control" required></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.phone">Phone</label><div class="input-group"><input type="text" id="cust-phone" class="form-control" oninput="handlePhoneInput(this.value)"><span class="input-group-text small" id="detectedCountryBadge">Auto</span></div></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.city">City</label><input type="text" id="cust-city" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.country">Country</label><input type="text" id="cust-country" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.address">Address</label><input type="text" id="cust-address" class="form-control"></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.source">Source</label><select id="cust-source" class="form-select"><option value="Website" data-i18n="src.Website">Website</option><option value="Referral" data-i18n="src.Referral">Referral</option><option value="Cold Call" data-i18n="src.Cold Call">Cold Call</option><option value="LinkedIn" data-i18n="src.LinkedIn">LinkedIn</option><option value="Trade Show" data-i18n="src.Trade Show">Trade Show</option></select></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.status">Status</label><select id="cust-status" class="form-select"><option value="New" selected data-i18n="st.New">New</option><option value="Voice Mail" data-i18n="st.Voice Mail">Voice Mail</option><option value="No Answer" data-i18n="st.No Answer">No Answer</option><option value="Hung Up" data-i18n="st.Hung Up">Hung Up</option><option value="Not Interested" data-i18n="st.Not Interested">Not Interested</option><option value="Busy" data-i18n="st.Busy">Busy</option><option value="Low Potential" data-i18n="st.Low Potential">Low Potential</option><option value="Interested" data-i18n="st.Interested">Interested</option><option value="Call Back" data-i18n="st.Call Back">Call Back</option><option value="Wrong Number" data-i18n="st.Wrong Number">Wrong Number</option><option value="Not Reachable" data-i18n="st.Not Reachable">Not Reachable</option><option value="Contacted" data-i18n="st.Contacted">Contacted</option><option value="Proposal Sent" data-i18n="st.Proposal Sent">Proposal Sent</option><option value="Customer" data-i18n="st.Customer">Customer</option><option value="Inactive" data-i18n="st.Inactive">Inactive</option></select></div><div class="col-12 col-md-4"><label class="form-label small fw-bold" data-i18n="lbl.priority">Priority</label><select id="cust-priority" class="form-select"><option value="Low" data-i18n="p.Low">Low</option><option value="Medium" selected data-i18n="p.Medium">Medium</option><option value="High" data-i18n="p.High">High</option></select></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.rep">Rep</label><input type="text" id="cust-rep" class="form-control" value="John Sales"></div><div class="col-12 col-md-6"><label class="form-label small fw-bold" data-i18n="lbl.followup">Follow-Up</label><input type="date" id="cust-followup" class="form-control"></div><div class="col-12"><label class="form-label small fw-bold" data-i18n="lbl.notes">Notes</label><textarea id="cust-notes" class="form-control" rows="3"></textarea></div><div class="modal-footer px-0 pb-0 pt-3"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="btn.cancel">Cancel</button><button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button></div></form></div></div></div></div>
 
 <div class="modal fade" id="detailsModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="detail-name">Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="detailModalBody"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="btn.close">Close</button></div></div></div></div>
 
@@ -797,7 +804,7 @@ en:{
 'f.search':'Search','f.show':'Show','f.clear':'Clear','f.all':'All',
 'lbl.name':'Name','lbl.company':'Company','lbl.email':'Email','lbl.phone':'Phone','lbl.city':'City','lbl.country':'Country','lbl.address':'Address','lbl.source':'Source','lbl.status':'Status','lbl.priority':'Priority','lbl.rep':'Rep','lbl.followup':'Follow-Up','lbl.notes':'Notes',
 'st.New':'New','st.Voice Mail':'Voice Mail','st.No Answer':'No Answer','st.Hung Up':'Hung Up','st.Not Interested':'Not Interested','st.Busy':'Busy','st.Low Potential':'Low Potential','st.Interested':'Interested','st.Call Back':'Call Back',
-'st.Wrong Number':'Wrong Number','st.Voicemail':'Voicemail','st.Contacted':'Contacted','st.Proposal Sent':'Proposal Sent','st.Customer':'Customer','st.Inactive':'Inactive',
+'st.Wrong Number':'Wrong Number','st.Not Reachable':'Not Reachable','st.Voicemail':'Voicemail','st.Contacted':'Contacted','st.Proposal Sent':'Proposal Sent','st.Customer':'Customer','st.Inactive':'Inactive',
 'p.High':'High','p.Medium':'Medium','p.Low':'Low',
 'src.Website':'Website','src.Referral':'Referral','src.Cold Call':'Cold Call','src.LinkedIn':'LinkedIn','src.Trade Show':'Trade Show',
 'bulk.selected':'{n} selected','bulk.autodial':'Auto Dial',
@@ -809,10 +816,10 @@ en:{
 'dlr.info':'After each call, hang up in MicroSIP then click a status button or "Next Call".','dlr.calls':'Calls','dlr.interval':'Interval (sec)','dlr.statusfilter':'Status Filter','dlr.f.new':'New Only','dlr.f.combo':'New + No Answer + Call Back','dlr.f.all':'All with phone',
 'dlr.calling':'Calling...','dlr.hangupthen':'Hang up in MicroSIP, then select status:','dlr.start':'Start','dlr.stop':'Stop','dlr.next':'Next Call (Skip)',
 'dlr.commentlbl':'Comment','dlr.commentph':'Add a note about this call...','dlr.savecomment':'Save Comment',
-'dlr.ready':'Ready','dlr.stopped':'Stopped','dlr.dialing':'Dialing #{i}: {name}','dlr.inprogress':'Call in progress: {name}','dlr.selectstatus':'Select status or click Next Call','dlr.comment':'Status set to "{s}" via dialer','dlr.author':'Auto Dialer',
+'dlr.ready':'Ready','dlr.stopped':'Stopped','dlr.dialing':'Dialing #{i}: {name}','dlr.invalidnum':'Invalid number: {name}','dlr.inprogress':'Call in progress: {name}','dlr.selectstatus':'Select status or click Next Call','dlr.comment':'Status set to "{s}" via dialer','dlr.author':'Auto Dialer',
 'modal.add':'Add Customer','modal.edit':'Edit Customer','auto':'Auto',
 'det.details':'Details','det.call':'Call','det.comments':'Comments','det.nocomments':'No comments.','det.addph':'Add a comment...','det.import':'Import',
-'t.nophone':'No phone number.','t.invalidnum':'Invalid number.','t.calling':'Calling {name}...','t.callended':'Call ended: {name}','t.noactivecall':'No active dialer call.','t.status':'Status: {s}',
+'t.nophone':'No phone number.','t.invalidnum':'Invalid number.','t.wrongnumber':'{name}: invalid number – classified as Wrong Number.','t.calling':'Calling {name}...','t.callended':'Call ended: {name}','t.noactivecall':'No active dialer call.','t.status':'Status: {s}',
 't.dialerdone':'Auto dialer completed!','t.dialerstopped':'Auto dialer stopped.','t.nocontactsphone':'No contacts with phone.','t.dialerstart':'Auto dialer: {n} calls.','t.selectcontacts':'Select contacts.','t.novalidnumbers':'No valid numbers.','t.queued':'{n} queued. Click Start.',
 't.noselection':'No selection.','t.nupdated':'{n} updated.','t.ndeleted':'{n} deleted.','t.namereq':'Name required.','t.emailreq':'Valid email required.','t.updated':'Updated.','t.added':'Added.','t.commentadded':'Comment added.','t.duplicated':'Duplicated.','t.archived':'Archived.','t.unarchived':'Unarchived.','t.deleted':'Deleted.','t.allnew':'All marked as New.','t.alldeleted':'All deleted.','t.commentsaved':'Comment saved.',
 't.nodata':'No data.','t.error':'Error: {m}','t.readerr':'Read error.','t.norows':'No rows.','t.imported':'Imported {n}!','t.exported':'Exported {n}.',
@@ -831,7 +838,7 @@ de:{
 'f.search':'Suche','f.show':'Anzeigen','f.clear':'Zurücksetzen','f.all':'Alle',
 'lbl.name':'Name','lbl.company':'Firma','lbl.email':'E-Mail','lbl.phone':'Telefon','lbl.city':'Stadt','lbl.country':'Land','lbl.address':'Adresse','lbl.source':'Quelle','lbl.status':'Status','lbl.priority':'Priorität','lbl.rep':'Vertriebsmitarbeiter','lbl.followup':'Wiedervorlage','lbl.notes':'Notizen',
 'st.New':'Neu','st.Voice Mail':'Mailbox','st.No Answer':'Nicht erreicht','st.Hung Up':'Aufgelegt','st.Not Interested':'Kein Interesse','st.Busy':'Besetzt','st.Low Potential':'Geringes Potenzial','st.Interested':'Interessiert','st.Call Back':'Rückruf',
-'st.Wrong Number':'Falsche Nummer','st.Voicemail':'Mailbox','st.Contacted':'Kontaktiert','st.Proposal Sent':'Angebot gesendet','st.Customer':'Kunde','st.Inactive':'Inaktiv',
+'st.Wrong Number':'Falsche Nummer','st.Not Reachable':'Nicht erreichbar','st.Voicemail':'Mailbox','st.Contacted':'Kontaktiert','st.Proposal Sent':'Angebot gesendet','st.Customer':'Kunde','st.Inactive':'Inaktiv',
 'p.High':'Hoch','p.Medium':'Mittel','p.Low':'Niedrig',
 'src.Website':'Website','src.Referral':'Empfehlung','src.Cold Call':'Kaltakquise','src.LinkedIn':'LinkedIn','src.Trade Show':'Messe',
 'bulk.selected':'{n} ausgewählt','bulk.autodial':'Automatisch wählen',
@@ -843,10 +850,10 @@ de:{
 'dlr.info':'Legen Sie nach jedem Anruf in MicroSIP auf und klicken Sie anschließend auf eine Status-Schaltfläche oder auf „Nächster Anruf“.','dlr.calls':'Anrufe','dlr.interval':'Intervall (Sek.)','dlr.statusfilter':'Statusfilter','dlr.f.new':'Nur Neu','dlr.f.combo':'Neu + Nicht erreicht + Rückruf','dlr.f.all':'Alle mit Telefonnummer',
 'dlr.calling':'Anruf läuft …','dlr.hangupthen':'In MicroSIP auflegen und anschließend den Status wählen:','dlr.start':'Starten','dlr.stop':'Stoppen','dlr.next':'Nächster Anruf (Überspringen)',
 'dlr.commentlbl':'Kommentar','dlr.commentph':'Notiz zu diesem Anruf hinzufügen …','dlr.savecomment':'Kommentar speichern',
-'dlr.ready':'Bereit','dlr.stopped':'Gestoppt','dlr.dialing':'Wähle #{i}: {name}','dlr.inprogress':'Anruf läuft: {name}','dlr.selectstatus':'Status wählen oder auf „Nächster Anruf“ klicken','dlr.comment':'Status per Dialer auf „{s}“ gesetzt','dlr.author':'Auto-Dialer',
+'dlr.ready':'Bereit','dlr.stopped':'Gestoppt','dlr.dialing':'Wähle #{i}: {name}','dlr.invalidnum':'Ungültige Nummer: {name}','dlr.inprogress':'Anruf läuft: {name}','dlr.selectstatus':'Status wählen oder auf „Nächster Anruf“ klicken','dlr.comment':'Status per Dialer auf „{s}“ gesetzt','dlr.author':'Auto-Dialer',
 'modal.add':'Kunde hinzufügen','modal.edit':'Kunde bearbeiten','auto':'Auto',
 'det.details':'Details','det.call':'Anrufen','det.comments':'Kommentare','det.nocomments':'Keine Kommentare vorhanden.','det.addph':'Kommentar hinzufügen …','det.import':'Import',
-'t.nophone':'Keine Telefonnummer vorhanden.','t.invalidnum':'Ungültige Nummer.','t.calling':'Anruf an {name} …','t.callended':'Anruf beendet: {name}','t.noactivecall':'Kein aktiver Dialer-Anruf.','t.status':'Status: {s}',
+'t.nophone':'Keine Telefonnummer vorhanden.','t.invalidnum':'Ungültige Nummer.','t.wrongnumber':'{name}: ungültige Nummer – als „Falsche Nummer“ eingestuft.','t.calling':'Anruf an {name} …','t.callended':'Anruf beendet: {name}','t.noactivecall':'Kein aktiver Dialer-Anruf.','t.status':'Status: {s}',
 't.dialerdone':'Auto-Dialer abgeschlossen!','t.dialerstopped':'Auto-Dialer gestoppt.','t.nocontactsphone':'Keine Kontakte mit Telefonnummer.','t.dialerstart':'Auto-Dialer: {n} Anrufe.','t.selectcontacts':'Bitte Kontakte auswählen.','t.novalidnumbers':'Keine gültigen Nummern.','t.queued':'{n} in der Warteschlange. Auf „Starten“ klicken.',
 't.noselection':'Keine Auswahl.','t.nupdated':'{n} aktualisiert.','t.ndeleted':'{n} gelöscht.','t.namereq':'Name ist erforderlich.','t.emailreq':'Gültige E-Mail-Adresse erforderlich.','t.updated':'Aktualisiert.','t.added':'Hinzugefügt.','t.commentadded':'Kommentar hinzugefügt.','t.duplicated':'Dupliziert.','t.archived':'Archiviert.','t.unarchived':'Wiederhergestellt.','t.deleted':'Gelöscht.','t.allnew':'Alle als „Neu“ markiert.','t.alldeleted':'Alle Datensätze gelöscht.','t.commentsaved':'Kommentar gespeichert.',
 't.nodata':'Keine Daten vorhanden.','t.error':'Fehler: {m}','t.readerr':'Die Datei konnte nicht gelesen werden.','t.norows':'Keine Zeilen vorhanden.','t.imported':'{n} importiert!','t.exported':'{n} exportiert.',
@@ -866,24 +873,28 @@ function tPrio(p){return I18N.en['p.'+p]!==undefined?t('p.'+p):p;}
 function tSrc(s){return I18N.en['src.'+s]!==undefined?t('src.'+s):s;}
 
 /* ================= STATUS DEFINITIONS ================= */
-const STATUSES=['New','Voice Mail','No Answer','Hung Up','Not Interested','Busy','Low Potential','Interested','Call Back'];
-const LEGACY_STATUSES=['Wrong Number','Voicemail','Contacted','Proposal Sent','Customer','Inactive'];
+/* Statuses available to the AI / auto-dialer classification — one button per status */
+const STATUSES=['New','Voice Mail','No Answer','Hung Up','Not Interested','Busy','Low Potential','Interested','Call Back','Wrong Number','Not Reachable'];
+/* Wrong Number is now a first-class status, so it left the legacy list */
+const LEGACY_STATUSES=['Voicemail','Contacted','Proposal Sent','Customer','Inactive'];
 const ALL_STATUSES=[...STATUSES,...LEGACY_STATUSES];
 
 const STATUS_COLORS={
  'New':'#6f42c1','Voice Mail':'#0dcaf0','No Answer':'#fd7e14','Hung Up':'#b02a37',
  'Not Interested':'#dc3545','Busy':'#d63384','Low Potential':'#6c757d','Interested':'#0d6efd','Call Back':'#20c997',
- 'Wrong Number':'#adb5bd','Voicemail':'#5bc0de','Contacted':'#0b5ed7','Proposal Sent':'#ffc107','Customer':'#198754','Inactive':'#6c757d'
+ 'Wrong Number':'#adb5bd','Not Reachable':'#b07715','Voicemail':'#5bc0de','Contacted':'#0b5ed7','Proposal Sent':'#ffc107','Customer':'#198754','Inactive':'#6c757d'
 };
 
 const DIALER_STATUS_ICONS={
  'New':'bi-star-fill','Voice Mail':'bi-voicemail','No Answer':'bi-telephone-x-fill','Hung Up':'bi-telephone-minus-fill',
  'Not Interested':'bi-hand-thumbs-down-fill','Busy':'bi-hourglass-split','Low Potential':'bi-graph-down-arrow',
- 'Interested':'bi-hand-thumbs-up-fill','Call Back':'bi-arrow-counterclockwise'
+ 'Interested':'bi-hand-thumbs-up-fill','Call Back':'bi-arrow-counterclockwise',
+ 'Wrong Number':'bi-exclamation-octagon-fill','Not Reachable':'bi-wifi-off'
 };
 const DIALER_STATUS_CLASS={
  'New':'new','Voice Mail':'voicemail','No Answer':'no-answer','Hung Up':'hungup','Not Interested':'not-interested',
- 'Busy':'busy','Low Potential':'lowpotential','Interested':'interested','Call Back':'callback'
+ 'Busy':'busy','Low Potential':'lowpotential','Interested':'interested','Call Back':'callback',
+ 'Wrong Number':'wrong-number','Not Reachable':'not-reachable'
 };
 
 const SOURCES=['Website','Referral','Cold Call','LinkedIn','Trade Show'];
@@ -1016,10 +1027,21 @@ window.setDialerBlur=setDialerBlur;
 /* ================= END DIALER BLUR ================= */
 
 function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'):'';}
-function statusClass(s){const map={'New':'status-badge-new','Voice Mail':'status-badge-voicemail','No Answer':'status-badge-no-answer','Hung Up':'status-badge-hungup','Not Interested':'status-badge-not-interested','Busy':'status-badge-busy','Low Potential':'status-badge-lowpotential','Interested':'status-badge-interested','Call Back':'status-badge-callback','Wrong Number':'status-badge-wrong-number','Voicemail':'status-badge-voicemail','Contacted':'status-badge-contacted','Proposal Sent':'status-badge-proposal','Customer':'status-badge-customer','Inactive':'status-badge-inactive'};return map[s]||'bg-light text-dark';}
+function statusClass(s){const map={'New':'status-badge-new','Voice Mail':'status-badge-voicemail','No Answer':'status-badge-no-answer','Hung Up':'status-badge-hungup','Not Interested':'status-badge-not-interested','Busy':'status-badge-busy','Low Potential':'status-badge-lowpotential','Interested':'status-badge-interested','Call Back':'status-badge-callback','Wrong Number':'status-badge-wrong-number','Not Reachable':'status-badge-not-reachable','Voicemail':'status-badge-voicemail','Contacted':'status-badge-contacted','Proposal Sent':'status-badge-proposal','Customer':'status-badge-customer','Inactive':'status-badge-inactive'};return map[s]||'bg-light text-dark';}
 function priorityClass(p){return p==='High'?'bg-danger':p==='Medium'?'bg-warning text-dark':'bg-info text-dark';}
 function fmtPhone(p){if(!p)return'-';const c=p.replace(/\s+/g,'');return c.startsWith('+')&&c.length>6?c.slice(0,3)+' '+c.slice(3,6)+' '+c.slice(6):p;}
 function rawPhone(p){return p?p.replace(/\s+/g,''):'';}
+
+/* A number is dialable only if it contains phone characters and 6–15 digits (E.164-ish).
+   Numbers with letters / junk are treated as invalid → classified as "Wrong Number". */
+function isDialablePhone(p){
+  const s=String(p||'').trim();
+  if(!s)return false;
+  if(!/^[+]?[\d\s().-]+$/.test(s))return false;
+  const digits=s.replace(/[^\d]/g,'');
+  return digits.length>=6 && digits.length<=15;
+}
+
 function nowStamp(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
 function fmtDur(sec){sec=Math.max(0,Math.round(sec));const m=Math.floor(sec/60);const s=sec%60;return m+':'+String(s).padStart(2,'0');}
 function avgDuration(c){
@@ -1101,6 +1123,19 @@ function dialerPushComment(cust,text){
   if(!cust.comments)cust.comments=[];
   cust.comments.unshift({id:'c-'+Date.now()+'-'+Math.random().toString(36).substr(2,4),author:cust.rep||t('dlr.author'),text:text,date:nowStamp()});
 }
+
+/* Central outcome writer for the auto-dialer — used by both automatic
+   classification (invalid number) and by the status buttons. */
+function classifyDialerOutcome(cust,status,extraNote){
+  if(!cust)return;
+  cust.status=status;
+  cust.updatedAt=new Date().toISOString();
+  if(!cust.comments)cust.comments=[];
+  cust.comments.unshift({id:'c-'+Date.now()+'-'+Math.random().toString(36).substr(2,4),author:t('dlr.author'),text:t('dlr.comment',{s:tStatus(status)}),date:nowStamp()});
+  if(extraNote)dialerPushComment(cust,extraNote);
+  save();
+}
+
 window.dialerSaveOnlyComment=function(){
   if(!adCurrentId){toast(t('t.noactivecall'),'danger');return;}
   const txt=dialerCommentValue();
@@ -1163,6 +1198,22 @@ function processNextAdCall(){
   document.getElementById('autoDialerStatus').innerText=t('dlr.dialing',{i:adIdx+1,name:c.name});
   document.getElementById('autoDialerCounter').innerText=`${adIdx+1}/${adTotal}`;
   document.getElementById('autoDialerProgressBar').style.width=`${((adIdx+1)/adTotal)*100}%`;
+
+  /* ---- INVALID / INCORRECT NUMBER → classify as "Wrong Number" (Falsche Nummer) ---- */
+  if(!isDialablePhone(c.phone)){
+    document.getElementById('autoDialerStatus').innerText=t('dlr.invalidnum',{name:c.name});
+    document.getElementById('currentCallInfo').classList.add('d-none');
+    document.getElementById('nextCallBtn').classList.add('d-none');
+    document.getElementById('dialerStatusButtons').classList.add('d-none');
+    document.getElementById('dialerCommentBox').classList.add('d-none');
+    classifyDialerOutcome(c,'Wrong Number');
+    refreshAll();
+    toast(t('t.wrongnumber',{name:esc(c.name)}),'danger');
+    adIdx++;
+    setTimeout(processNextAdCall,700);
+    return;
+  }
+
   document.getElementById('currentCallInfo').classList.remove('d-none');
   document.getElementById('currentCallName').innerText=c.name;
   document.getElementById('currentCallNumber').innerText=fmtPhone(c.phone);
@@ -1397,6 +1448,13 @@ function setupPreview(raw){
   statusLookup['geringes potenzial']='Low Potential';
   statusLookup['interested']='Interested';
   statusLookup['interessiert']='Interested';
+  /* NEW — call-outcome aliases */
+  statusLookup['wrong number']='Wrong Number';
+  statusLookup['invalid number']='Wrong Number';
+  statusLookup['falsche nummer']='Wrong Number';
+  statusLookup['not reachable']='Not Reachable';
+  statusLookup['unreachable']='Not Reachable';
+  statusLookup['nicht erreichbar']='Not Reachable';
 
   tempImport=rows.map((row,idx)=>{
     const first=col(row,1), last=col(row,2);
